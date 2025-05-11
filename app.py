@@ -9,7 +9,7 @@ OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 st.set_page_config(page_title="BMI Health Advisor", layout="centered")
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>BMI Health Advisor 💬</h1>", unsafe_allow_html=True)
 
-# Function to get advice from OpenRouter API
+# Function to get advice from OpenRouter API with bullet formatting
 def get_openrouter_advice(query):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -29,24 +29,26 @@ def get_openrouter_advice(query):
 
         if "choices" in result:
             advice = result["choices"][0]["message"]["content"]
-            advice_lines = advice.split("\n")
-            concise_advice = [line.strip() for line in advice_lines if line.strip()]
-            return "\n- " + "\n- ".join(concise_advice)
+
+            # Handle both '|' and newline as separators
+            if "|" in advice:
+                segments = [segment.strip() for segment in advice.split("|") if segment.strip()]
+            else:
+                segments = [line.strip() for line in advice.split("\n") if line.strip()]
+
+            # Return as markdown bullet points
+            return "\n".join([f"- {line}" for line in segments])
         else:
             return "⚠️ Unable to fetch valid advice from the response."
-    
+
     except requests.exceptions.RequestException as e:
         return f"⚠️ API request failed: {str(e)}"
     except Exception as e:
         return f"⚠️ An error occurred: {str(e)}"
 
-# BMI calculator logic
+# BMI calculator inputs
 weight = st.number_input("Enter your weight (kg):", min_value=10.0, max_value=300.0, step=0.5)
 height = st.number_input("Enter your height (cm):", min_value=50.0, max_value=250.0, step=0.5)
-
-# Optional: Removed voice input button
-# if st.button("🎙️ Speak Instead"):
-#     st.write("🗣️ Voice input is disabled in this version.")
 
 if st.button("Calculate BMI"):
     if height > 0:
@@ -54,7 +56,7 @@ if st.button("Calculate BMI"):
         bmi = weight / (height_m ** 2)
         st.success(f"Your BMI is: {bmi:.2f}")
 
-        # Determine BMI category and query advice
+        # Determine status and get appropriate query
         if bmi < 18.5:
             status = "Underweight"
             query = "Suggest a healthy way to gain weight for an underweight person using diet and exercise."
