@@ -1,0 +1,7 @@
+streamlit
+speechrecognition
+requests
+pygame
+gtts
+python-dotenv
+pyaudio
