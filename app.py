@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import re
 
 # 🔐 Use Streamlit secrets for OpenRouter API key
 OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
@@ -10,7 +9,7 @@ OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 st.set_page_config(page_title="BMI Health Advisor", layout="centered")
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>BMI Health Advisor 💬</h1>", unsafe_allow_html=True)
 
-# OpenRouter chatbot advice (Concise version)
+# Function to get advice from OpenRouter API
 def get_openrouter_advice(query):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -25,18 +24,14 @@ def get_openrouter_advice(query):
     }
     try:
         response = requests.post(OPENROUTER_ENDPOINT, json=data, headers=headers)
-        response.raise_for_status()  # Check for HTTP errors
+        response.raise_for_status()
         result = response.json()
-
-        # Debug: Print the entire response to understand the structure
-        # st.write("Response from API:", result)
 
         if "choices" in result:
             advice = result["choices"][0]["message"]["content"]
-            # Extract key points to make it concise
             advice_lines = advice.split("\n")
-            concise_advice = [line for line in advice_lines if line.strip()]
-            return " | ".join(concise_advice)  # Join concise advice in a single line separated by '|'
+            concise_advice = [line.strip() for line in advice_lines if line.strip()]
+            return "\n- " + "\n- ".join(concise_advice)
         else:
             return "⚠️ Unable to fetch valid advice from the response."
     
@@ -49,9 +44,9 @@ def get_openrouter_advice(query):
 weight = st.number_input("Enter your weight (kg):", min_value=10.0, max_value=300.0, step=0.5)
 height = st.number_input("Enter your height (cm):", min_value=50.0, max_value=250.0, step=0.5)
 
-if st.button("🎙️ Speak Instead"):
-    # This button is no longer needed and can be removed.
-    st.write("🗣️ Voice input is disabled in this version.")
+# Optional: Removed voice input button
+# if st.button("🎙️ Speak Instead"):
+#     st.write("🗣️ Voice input is disabled in this version.")
 
 if st.button("Calculate BMI"):
     if height > 0:
@@ -59,6 +54,7 @@ if st.button("Calculate BMI"):
         bmi = weight / (height_m ** 2)
         st.success(f"Your BMI is: {bmi:.2f}")
 
+        # Determine BMI category and query advice
         if bmi < 18.5:
             status = "Underweight"
             query = "Suggest a healthy way to gain weight for an underweight person using diet and exercise."
@@ -72,6 +68,6 @@ if st.button("Calculate BMI"):
         st.markdown(f"### Status: `{status}`")
         st.markdown("### 💡 Chatbot Advice:")
         advice = get_openrouter_advice(query)
-        st.write(advice)
+        st.markdown(advice)
     else:
         st.warning("Please enter a valid height.")
