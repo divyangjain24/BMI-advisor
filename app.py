@@ -59,16 +59,16 @@ if st.button("Calculate BMI"):
         # Determine status and get appropriate query
         if bmi < 18.5:
             status = "Underweight"
-            query = "Suggest a healthy way to gain weight for an underweight person using diet and exercise."
+            query = "Act as a certified BMI doctor and nutritionist. My BMI is below 18.5, which classifies me as underweight. Please provide a medically accurate and structured treatment plan to help me gain weight in a healthy and sustainable way. Include dietary recommendations, safe exercise routines, and lifestyle changes. Use bullet points for clarity. Also, mention potential risks of being underweight and when I should seek medical attention."
         elif 18.5 <= bmi <= 24.9:
             status = "Normal"
-            query = "Suggest how to maintain current healthy weight through lifestyle and diet."
+            query = "You are an expert BMI doctor and fitness consultant. My BMI is in the normal range (18.5 to 24.9). Please advise me on how to maintain this healthy BMI through a balanced diet, fitness habits, and lifestyle choices. Provide practical tips for long-term weight management, stress reduction, and early signs that may indicate a shift away from this healthy range. Use bullet points and simple explanations."
         else:
             status = "Overweight"
-            query = "Suggest a healthy way to lose weight for an overweight person using diet and exercise."
+            query = "Act as a professional BMI doctor and health coach. My BMI is above 25, putting me in the overweight category. I want a detailed, medically sound plan to reduce my BMI safely. Suggest a diet strategy, workout routine, and lifestyle habits for healthy weight loss. Keep your response structured using bullet points, and include cautionary notes on crash diets or unhealthy practices. Also mention when it’s important to consult a physician."
 
         st.markdown(f"### Status: `{status}`")
-        st.markdown("### 💡 Chatbot Advice:")
+        st.markdown("### 💡 Experts Advice:")
         advice = get_openrouter_advice(query)
         st.markdown(advice)
     else:
