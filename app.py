@@ -5,11 +5,10 @@ import pygame
 import uuid
 from gtts import gTTS
 import os
-from dotenv import load_dotenv
+import re
 
-# Load environment variables
-load_dotenv()
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# 🔐 Use Streamlit secrets for OpenRouter API key
+OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
 OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 
 # UI setup
@@ -56,21 +55,13 @@ def get_openrouter_advice(query):
             {"role": "user", "content": query},
         ],
     }
+    response = requests.post(OPENROUTER_ENDPOINT, json=data, headers=headers)
 
     try:
-        response = requests.post(OPENROUTER_ENDPOINT, json=data, headers=headers)
         result = response.json()
-
-        if "choices" in result:
-            return result["choices"][0]["message"]["content"]
-        else:
-            error_message = result.get("error", {}).get("message", "Unknown error.")
-            st.error(f"OpenRouter Error: {error_message}")
-            return f"⚠️ Unable to fetch advice. {error_message}"
-
+        return result["choices"][0]["message"]["content"]
     except Exception as e:
-        st.error(f"Request failed: {e}")
-        return f"⚠️ Exception occurred: {e}"
+        return f"⚠️ Unable to fetch advice. {result.get('error', {}).get('message', str(e))}"
 
 # BMI calculator logic
 weight = st.number_input("Enter your weight (kg):", min_value=10.0, max_value=300.0, step=0.5)
@@ -80,7 +71,6 @@ if st.button("🎙️ Speak Instead"):
     text = get_voice_input()
     st.write("🗣️ You said:", text)
 
-    import re
     nums = [float(n) for n in re.findall(r"\d+(?:\.\d+)?", text)]
     if len(nums) >= 2:
         weight = nums[0]
