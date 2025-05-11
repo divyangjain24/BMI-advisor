@@ -23,13 +23,23 @@ def get_openrouter_advice(query):
             {"role": "user", "content": query},
         ],
     }
-    response = requests.post(OPENROUTER_ENDPOINT, json=data, headers=headers)
-
     try:
+        response = requests.post(OPENROUTER_ENDPOINT, json=data, headers=headers)
+        response.raise_for_status()  # Check for HTTP errors
         result = response.json()
-        return result["choices"][0]["message"]["content"]
+
+        # Debug: Print the entire response to understand the structure
+        st.write("Response from API:", result)
+
+        if "choices" in result:
+            return result["choices"][0]["message"]["content"]
+        else:
+            return "⚠️ Unable to fetch valid advice from the response."
+    
+    except requests.exceptions.RequestException as e:
+        return f"⚠️ API request failed: {str(e)}"
     except Exception as e:
-        return f"⚠️ Unable to fetch advice. {str(e)}"
+        return f"⚠️ An error occurred: {str(e)}"
 
 # BMI calculator logic
 weight = st.number_input("Enter your weight (kg):", min_value=10.0, max_value=300.0, step=0.5)
