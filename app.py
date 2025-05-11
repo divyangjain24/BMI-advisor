@@ -10,7 +10,7 @@ OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 st.set_page_config(page_title="BMI Health Advisor", layout="centered")
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>BMI Health Advisor 💬</h1>", unsafe_allow_html=True)
 
-# OpenRouter chatbot advice
+# OpenRouter chatbot advice (Concise version)
 def get_openrouter_advice(query):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -29,10 +29,14 @@ def get_openrouter_advice(query):
         result = response.json()
 
         # Debug: Print the entire response to understand the structure
-        st.write("Response from API:", result)
+        # st.write("Response from API:", result)
 
         if "choices" in result:
-            return result["choices"][0]["message"]["content"]
+            advice = result["choices"][0]["message"]["content"]
+            # Extract key points to make it concise
+            advice_lines = advice.split("\n")
+            concise_advice = [line for line in advice_lines if line.strip()]
+            return " | ".join(concise_advice)  # Join concise advice in a single line separated by '|'
         else:
             return "⚠️ Unable to fetch valid advice from the response."
     
